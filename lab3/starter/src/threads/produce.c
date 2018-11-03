@@ -64,7 +64,25 @@ int main(int argc, char *argv[])
 	exit(0);
 }
 
-void* consumer(){
+void* consumer(void* arugument){
+	int* id = (int*) argument;
+	int num;
+	int sqrt;
+	
+	while (1) {	
+		// check if tasks are empty
+			// if empty kill the thread
+
+		// get stuff from the buffer
+		// free the buffer
+
+		for (int = 0; i < (num/2); i++){
+			if ( (i*i) == num ) {
+				printf("%d %d %d\n", *id, num, sqrt);
+			}
+		}
+		
+	}
 
 }
 
@@ -81,3 +99,5 @@ void* producer(void* argument){
 		}
 	}
 }
+
+

@@ -35,7 +35,8 @@ int main(int argc, char *argv[])
 	maxmsg = atoi(argv[2]); /* buffer size                */
 	num_p = atoi(argv[3]);  /* number of producers        */
 	num_c = atoi(argv[4]);  /* number of consumers        */
-
+	
+	int* arg_list[4] ={ num,  num_p, , num_c };	
 
 	gettimeofday(&tv, NULL);
 	g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
@@ -48,3 +49,75 @@ int main(int argc, char *argv[])
             g_time[1] - g_time[0]);
 	exit(0);
 }
+
+
+int spawn (char* program, char** arg_list)
+{
+  pid_t child_pid;
+
+  /* Duplicate this process.  */
+  child_pid = fork ();
+  if (child_pid != 0)
+    /* This is the parent process.  */
+    return child_pid;
+  else {
+    /* Now execute PROGRAM, searching for it in the path.  */
+    execvp (program, arg_list);
+    /* The execvp function returns only if an error occurs.  */
+    fprintf (stderr, "an error occurred in execvp\n");
+    abort ();
+  }
+}
+
+int main ()
+{
+  /* The argument list to pass to the "ls" command.  */
+ 
+
+  /* Spawn a child process running the "ls" command.  Ignore the
+     returned child process id.  */
+  spawn ("ls", arg_list); 
+
+  printf ("done with main program\n");
+
+  return 0;
+}
+
+
+void* consumer(void* arugument){
+	int* id = (int*) argument;
+	int num;
+	int sqrt;
+	
+	while (1) {	
+		// check if tasks are empty
+			// if empty kill the thread
+
+		// get stuff from the buffer
+		// free the buffer
+
+		for (int = 0; i < (num/2); i++){
+			if ( (i*i) == num ) {
+				printf("%d %d %d\n", *id, num, sqrt);
+			}
+		}
+		
+	}
+
+}
+
+void* producer(void* argument){
+	int* id = (int*) argument;
+	
+	for (i=0; i < num; i++){
+		//check if the buffer is full
+		if ((i%num_p) == *id){
+			//lock something
+			// add iterm to the buffer
+			// unlock something
+			
+		}
+	}
+}
+
+
