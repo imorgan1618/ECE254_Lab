@@ -69,19 +69,6 @@ int spawn (char* program, char** arg_list)
   }
 }
 
-int main ()
-{
-  /* The argument list to pass to the "ls" command.  */
- 
-
-  /* Spawn a child process running the "ls" command.  Ignore the
-     returned child process id.  */
-  spawn ("ls", arg_list); 
-
-  printf ("done with main program\n");
-
-  return 0;
-}
 
 
 void* consumer(void* arugument){
