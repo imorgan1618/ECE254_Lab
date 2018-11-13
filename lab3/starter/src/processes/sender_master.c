@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     gettimeofday(&tv, NULL);
     ta = tv.tv_sec + tv.tv_usec/1000000.0;
 
-    for (i = 0; i < atoi(argv[3]; i++)) {
+    for (i = 0; i < atoi(argv[3]); i++)) {
         char str[15];
         sprintf(str, "%d", i);
         pro_arg_list[4] = str;
