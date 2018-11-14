@@ -57,13 +57,13 @@ int main(int argc, char *argv[])
 	num_p = atoi(argv[3]);  /* number of producers        */
 	num_c = atoi(argv[4]);  /* number of consumers        */
 	
-	pro_arg_list[0] = "./sender.out";
+	pro_arg_list[0] = "/mailbox1_i2morgan";
 	pro_arg_list[1] = argv[1];
 	pro_arg_list[2] = argv[2];
 	pro_arg_list[3] = argv[3];
 	pro_arg_list[4] = NULL;
 	
-	con_arg_list[0] = "./receiver.out";
+	con_arg_list[0] = "/mailbox1_i2morgan";
 	con_arg_list[1] = argv[1];
 	con_arg_list[2] = argv[2];
 	con_arg_list[3] = argv[4];

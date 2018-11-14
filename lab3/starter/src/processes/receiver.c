@@ -31,14 +31,17 @@ int main(int argc, char*argv[])
 	mode_t mode = S_IRUSR | S_IWUSR;
 	struct mq_attr attr;
 
-	if (argc != 2) {
+	int pt;
+	int sq;
+
+/* 	if (argc != 4) {
 		printf("Usage: %s <qname>\n", argv[0]);
 		printf("The qname must start with a \"/\".\n");
 		printf("An example qname: /mailbox1_i2morgan\n");
 		exit(1);
-	}
-
-	qname = argv[1];
+	} 
+*/
+	qname ="/mailbox1_i2morgan";  // argv[1];
 
 	attr.mq_maxmsg = QUEUE_SIZE;
 	attr.mq_msgsize = sizeof(struct point);
@@ -65,6 +68,15 @@ int main(int argc, char*argv[])
 				get_x_coord(pt), get_y_coord(pt));
 		}
 	}
+
+	while (1) {
+		if (mq_receive(qdes, (char *)&ptr, sizeof(int), 0) == -1) {
+			perror("mq_receive() failed");
+		} else {
+			i++;
+		}
+	}
+
 
 	if (mq_close(qdes) == -1) {
 		perror("mq_close() failed");

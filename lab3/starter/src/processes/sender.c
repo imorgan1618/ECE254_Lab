@@ -33,20 +33,25 @@ int main(int argc, char *argv[])
 {
 	mqd_t qdes;
 	char quit = '\0';
-
+	int i = 0;
 	char *qname = NULL;
+	
+	int produced = 0;
+	int iterated = 0;
+	int num = atoi(argv[1]);
+	int num_p = atoi(argv[3]);
 
 	mode_t mode = S_IRUSR | S_IWUSR;
 	struct mq_attr attr;
 
-	if (argc != 2) {
+	/*if (argc != 4) {
 		printf("Usage: %s <qname>\n", argv[0]);
 		printf("The qname must start with a \"/\". \n");
 		printf("An example qname: /mailbox1_i2morgan\n");
 		exit(1);
-	}
+	}*/
 
-	qname = argv[1];
+	qname ="/mailbox1_i2morgan"; // argv[0];
 
         attr.mq_maxmsg = QUEUE_SIZE;
 	attr.mq_msgsize = sizeof(struct point);
@@ -60,6 +65,7 @@ int main(int argc, char *argv[])
 
 	srand(time(0));
 
+/*printf("Press the ENTER key to send a random point ('q'+ENTER to quit).\n> ");
 	do {
 		quit = getchar();
 		struct point pt;
@@ -72,6 +78,20 @@ int main(int argc, char *argv[])
 		printf("Sending a random point at (%d, %d)...\n> ", \
 			get_x_coord(pt), get_y_coord(pt));
 	} while (quit != 'q');
+*/
+
+/* TEST */
+	while (produced < num/num_p) {
+		if ((iterated%num_p) == *id) {
+			if (mq_send(qdes, (char *)&iterated, sizeof(int), 0) == -1) {
+				perror("mq_send() failed");
+			}
+			produced++;
+		}
+		iterated++;
+	}
+
+/* */
 
 	if (mq_close(qdes) != -1) {
 		perror("mq_close() failed");
