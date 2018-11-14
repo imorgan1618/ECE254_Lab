@@ -98,18 +98,19 @@ int main(int argc, char *argv[])
 	for (i = num_p + num_c; i > 0; i--) {
 		wait(&status);
 		if (WIFEXITED(status)) {
-			finished++;
+//			finished++;
 			printf("child exited with = %d\n", WEXITSTATUS(status));
 
-			if (finished == num_p) {
-        			for (j = 0; j < num_c; j++) {
+//			if (finished == num_p) {
+    //    			for (j = 0; j < num_c; j++) {
 //					char str[15];
  //               			sprintf(str, "%d", -1);
   //              			pro_arg_list[4] = str;
-                			printf("spawning producers\n");
+  //              			printf("spawning producers\n");
     //            			spawn("./sender.out", pro_arg_list);
-				}
-			}
+//				}
+//
+//			}
 		} else {
 			printf("Abnormal exit");
 		}
