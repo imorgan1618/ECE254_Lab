@@ -40,12 +40,10 @@ int remove_from_buffer(struct node *);
 void insert(struct node *, int); 
 struct single_list buffer;
 double g_time[2];
-int remaining;
 int num_p;
 int num;
 sem_t spaces;
 sem_t items;
-pthread_mutex_t mutex;
 
 
 int main(int argc, char *argv[])
@@ -59,23 +57,21 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	gettimeofday(&tv, NULL);
+	g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
+
 	num = atoi(argv[1]);	/* number of items to produce */
 	maxmsg = atoi(argv[2]); /* buffer size                */
 	num_p = atoi(argv[3]);  /* number of producers        */
 	num_c = atoi(argv[4]);  /* number of consumers        */
-	remaining = num; 
 
 	sem_init( &spaces, 0, maxmsg);
 	sem_init( &items, 0, 0);
 	single_list_init(buffer);
 
-	pthread_mutex_init(&mutex, NULL);
-	
 	pthread_t producer_threads[num_p];
     pthread_t consumer_threads[num_c];
 
-	gettimeofday(&tv, NULL);
-	g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
 	for (int i = 0; i < num_p ; i++){
 		int* id = malloc(sizeof(int));
 		*id = i;
@@ -97,7 +93,7 @@ int main(int argc, char *argv[])
     }
         
 	for ( int l = 0; l < num_c; l ++){
-		pthread_join(consumer_threads[l], NULL);
+        pthread_join(consumer_threads[l], NULL);
 	}
 
 
@@ -106,44 +102,45 @@ int main(int argc, char *argv[])
 
     printf("System execution time: %.6lf seconds\n", \
         	g_time[1] - g_time[0]);
-	sem_destroy( &spaces );
+	
+    // Destroy the sems and mutex
+    sem_destroy( &spaces );
 	sem_destroy( &items );
-	pthread_mutex_destroy( &mutex );
-
+    pthread_mutex_destroy( &(buffer.sem));
 	exit(0);
 }
 
 void* consumer(void* argument){
 	int* id = (int*) argument;
 	int consumed_val = -1;
-	//printf("consumer id: %d started\n", *id);
     while (1) {	
         struct node *tmp = malloc(sizeof(struct node));
-		consumed_val = remove_from_buffer( tmp );
-	    if (consumed_val == -1){
-            break;
-        }	
+		consumed_val = remove_from_buffer( tmp ); // cosume from buff
 		printer(consumed_val, *id); // print the squar root
+	    if (consumed_val == -1){ 
+            break; // if you get a death sentence die
+        }	
 	}
-    //printf("consumer:%d exited\n", *id);
-	pthread_exit(NULL);
+    free(id); // free the id
+    pthread_exit(NULL);
 }
 
 
 void* producer(void* argument){
 	int* id = (int*) argument;
-    int produced = 0;
-    int iterated = 0;
+    int produced = 0; // Items this producer has produced
+    //int iterated = 0; // Index or num times iterated
 
-    while (produced < num/num_p){ 
-        if ((iterated%num_p) == *id){
+    // Iterate until producer has produced its share of numbers
+    for (int iterated = 0; iterated < num; iterated ++){ 
+        if ((iterated%num_p) == *id){ // got a match!
 			struct node* tmp_p = malloc(sizeof(struct node));
-			insert(tmp_p, iterated);
-            produced ++;
+			insert(tmp_p, iterated); // insert num into buffer
+            produced ++; //increment produced
 		}
-        iterated ++;
+        iterated ++; //increment iterated
 	}
-    //printf("producer: %d exited\n", *id);
+    free(id); // free it !
 	pthread_exit(NULL);
 }
 
@@ -155,32 +152,29 @@ void insert(struct node* tmp_p, int i){
 	tmp_p->next = NULL; // This will go to the end of the list
 	tmp_p->value=i; // Set the value
 		
-	if (buffer.size == 0) {
-		buffer.head = tmp_p;
+	if (buffer.size == 0) { // logic for when the buffer is empty
+		buffer.head = tmp_p; 
 		buffer.tail = tmp_p;	
-	} else {
+	} else { 
 		buffer.tail->next=tmp_p; // Point the tail to the temp
-		buffer.tail = tmp_p; // set the tail to tmp
+		buffer.tail = tmp_p; // set the new location of tail
 	}
 
 	buffer.size ++; // increase the buffer count
-    pthread_mutex_unlock(&(buffer.sem)); // free the buff
+    pthread_mutex_unlock(&(buffer.sem)); // unlock the buff
 	sem_post(&items); // post to items
-	
-    pthread_mutex_lock( &mutex); // This could be bad	
-	remaining --;
-	pthread_mutex_unlock( &mutex); //unlock
 }
 
 
 int remove_from_buffer( struct node * tmp){
-    int consumed_val = -1; sem_wait(&items); // wait on available items
+    int consumed_val = -1; // value from buffer 
+    sem_wait(&items); // wait on available items
     pthread_mutex_lock(&(buffer.sem)); // wait on buffer being available
 
 	tmp = buffer.head; // set temp to the head of the list
 	consumed_val = tmp->value; // get the value of that item
-	if (buffer.size <= 1){
-		buffer.head = NULL;			
+	if (buffer.size <= 1){ // if there is only one item in buff
+		buffer.head = NULL;		
         buffer.tail = NULL;
 	} else {
 		buffer.head = tmp->next; // adjust the buffer head
@@ -190,7 +184,6 @@ int remove_from_buffer( struct node * tmp){
 	pthread_mutex_unlock(&(buffer.sem)); // signal that the buffer is free
 	sem_post(&spaces); // signal that an item has been removed 
 	free(tmp); // free the old head/tmp
-    //printf("Removing into the queue: %d\n", consumed_val);
     return(consumed_val);
 }
 
