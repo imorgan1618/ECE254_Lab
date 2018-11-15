@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     }
         
 	for ( int l = 0; l < num_c; l ++){
-		pthread_join(consumer_threads[l], NULL);
+        pthread_join(consumer_threads[l], NULL);
 	}
 
 
@@ -116,23 +116,23 @@ void* consumer(void* argument){
     while (1) {	
         struct node *tmp = malloc(sizeof(struct node));
 		consumed_val = remove_from_buffer( tmp ); // cosume from buff
+		printer(consumed_val, *id); // print the squar root
 	    if (consumed_val == -1){ 
             break; // if you get a death sentence die
         }	
-		printer(consumed_val, *id); // print the squar root
 	}
     free(id); // free the id
-	pthread_exit(NULL);
+    pthread_exit(NULL);
 }
 
 
 void* producer(void* argument){
 	int* id = (int*) argument;
     int produced = 0; // Items this producer has produced
-    int iterated = 0; // Index or num times iterated
+    //int iterated = 0; // Index or num times iterated
 
     // Iterate until producer has produced its share of numbers
-    while (produced < num/num_p){ 
+    for (int iterated = 0; iterated < num; iterated ++){ 
         if ((iterated%num_p) == *id){ // got a match!
 			struct node* tmp_p = malloc(sizeof(struct node));
 			insert(tmp_p, iterated); // insert num into buffer
