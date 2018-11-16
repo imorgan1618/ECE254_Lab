@@ -10,41 +10,49 @@
 
 #include "common.h"
 
+#define _X_OPEN_SOURCE 600
+
 int main(int argc, char*argv[])
 {
-    mqd_t qdes;
-    char qname[] = "/mailbox1_i2morgan";
-    mode_t mode = S_IRUSR | S_IWUSR;
-    struct mq_attr attr;
+    	mqd_t qdes;
+    	char *qname = NULL;
+    	mode_t mode = S_IRUSR | S_IWUSR;
+    	struct mq_attr attr;
+ 	
+	int id = atoi(argv[4]);
+	qname = "/mailbox1_i2morgan";
 
-    int N = atoi(argv[1]);
-    int B = atoi(argv[2]);
+    	attr.mq_maxmsg = QUEUE_SIZE;
+    	attr.mq_msgsize = sizeof(int);
+    	attr.mq_flags = 0;
 
-    if (argc != 3) {
-        printf("Usage: produce <N> <B>\n");
-        exit(1);
-    }
+   	qdes = mq_open(qname, O_RDONLY, mode, &attr);
+    	if (qdes == -1) {
+        	perror("mq_open()");
+       		exit(1);
+    	}
 
-    attr.mq_maxmsg = B;
-    attr.mq_msgsize = sizeof(int);
-    attr.mq_flags = 0;
+    	while (1) {
+        	int number;
+        	if (mq_receive(qdes, (char *) &number, sizeof(int), 0) == -1) {
+             		perror("mq_receive() failed");
+			break;
+        	} else {
+			if (number == -1) {
+				break;
+			}
 
-    qdes = mq_open(qname, O_RDONLY, mode, &attr);
-    if (qdes == -1) {
-        perror("mq_open()");
-        exit(1);
-    }
-
-    int count = 0;
-    while (count < N) {
-        int number;
-        if (mq_receive(qdes, (char *) &number, sizeof(int), 0) == -1) {
-             perror("mq_receive() failed");
-        } else {
-             printf("%d is consumed\n", number);
-             count++;
-        }
-    }
+			if number == 0 || number == 1() {
+				printf("%d %d %d \n", id, number, number);
+			}		
+	
+			for (int i = 0; i < number; i++) {
+				if (i*i == numer) {
+             				printf("%d %d %d \n", id, number, i);
+				}
+			}
+       	 	}
+    	}
 
    if (mq_close(qdes) == -1) {
         perror("mq_close() failed");
