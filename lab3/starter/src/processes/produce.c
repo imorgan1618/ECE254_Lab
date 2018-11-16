@@ -19,7 +19,7 @@ double g_time[2];
 int spawn (char* program, char** arg_list)
 {
   	pid_t child_pid;
-	int errno;
+	int errno = -1;
 
   	/* Duplicate this process.  */
   	child_pid = fork();
@@ -41,23 +41,24 @@ int main(int argc, char *argv[])
 {
 //	int num = 0;
 //	int maxmsg = 0;
+	
 	int num_p = 0;
 	int num_c = 0;
 	int i = 0;
 	int j = 0;
-//	int endItem = -1;
 	int status;
 	int finished = 0;
 
 	struct timeval tv;
-	char* pro_arg_list[5];
+	char* pro_arg_list[6];
 	char* con_arg_list[6];
 
 	if (argc != 5) {
 		printf("Usage: %s <N> <B> <P> <C>\n", argv[0]);
 		exit(1);
 	}
-
+        gettimeofday(&tv, NULL);
+        g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
 //	num = atoi(argv[1]);	/* number of items to produce */
 //	maxmsg = atoi(argv[2]); /* buffer size                */
 	num_p = atoi(argv[3]);  /* number of producers        */
@@ -67,7 +68,8 @@ int main(int argc, char *argv[])
 	pro_arg_list[1] = argv[1];
 	pro_arg_list[2] = argv[2];
 	pro_arg_list[3] = argv[3];
-	pro_arg_list[4] = NULL;	
+	pro_arg_list[4] = NULL;
+	pro_arg_list[5] = NULL;	
 
 	con_arg_list[0] = "/mailbox1_i2morgan";
 	con_arg_list[1] = argv[1];
@@ -75,15 +77,11 @@ int main(int argc, char *argv[])
 	con_arg_list[3] = argv[4];
 	con_arg_list[4] = NULL;
 	con_arg_list[5] = NULL;
-	
-	gettimeofday(&tv, NULL);
-	g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
 
 	for (i = 0; i < num_p; i++) {
         	char str[15];
 		sprintf(str, "%d", i);
 		pro_arg_list[4] = str;
-		printf("Making senders\n");
 		spawn("./sender.out", pro_arg_list);
         }
 
@@ -91,26 +89,22 @@ int main(int argc, char *argv[])
 		char str[15];
 		sprintf(str, "%d", i);
 		con_arg_list[4] = str;
-		printf("Making receivers\n");
 		spawn("./receiver.out", con_arg_list);
 	}
 
 	for (i = num_p + num_c; i > 0; i--) {
 		wait(&status);
 		if (WIFEXITED(status)) {
-//			finished++;
-			printf("child exited with = %d\n", WEXITSTATUS(status));
+			finished++;
+			if (finished == num_p) {
+        			for (j = 0; j < num_c; j++) {
+					char str[15];
+	              			sprintf(str, "%d", -1);
+                			pro_arg_list[4] = str;
+                			spawn("./sender.out", pro_arg_list);
+				}
 
-//			if (finished == num_p) {
-    //    			for (j = 0; j < num_c; j++) {
-//					char str[15];
- //               			sprintf(str, "%d", -1);
-  //              			pro_arg_list[4] = str;
-  //              			printf("spawning producers\n");
-    //            			spawn("./sender.out", pro_arg_list);
-//				}
-//
-//			}
+			}
 		} else {
 			printf("Abnormal exit");
 		}

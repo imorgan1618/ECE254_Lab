@@ -45,7 +45,7 @@ int main(int argc, char*argv[])
 		exit(1);
 	}
 
-	signal(SIGINT, sig_handler);
+//	signal(SIGINT, sig_handler);
 
 	while (1) {
 		int number;

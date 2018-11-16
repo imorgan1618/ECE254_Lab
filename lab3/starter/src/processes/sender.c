@@ -37,7 +37,6 @@ int main(int argc, char *argv[])
 	int produced = 0;
 	int iterated = 0;
 	int endItem = -1;
-	int i = 0;
 
 	int num = atoi(argv[1]);
 	int num_p = atoi(argv[3]);
@@ -57,26 +56,25 @@ int main(int argc, char *argv[])
 		perror("mq_open() failed");
 		exit(1);
 	}
-	printf("In sender\n");
-	srand(time(0));
 
-	//if (id == -1) {
-//		if (mq_send(qdes, (char *)&endItem, sizeof(int), 0) == -1) {
-//	              perror("mq_send() failed");
- //                }
-//	} else {
+	if (id == -1) {
+		if (mq_send(qdes, (char *)&endItem, sizeof(int), 0) == -1) {
+	              perror("mq_send() failed");
+                }
+	} else {
 		while (produced < num/num_p) {
 			int item;
 			if ((iterated%num_p) == id) {
 				item = iterated;
 				if (mq_send(qdes, (char *)&item, sizeof(int), 0) == -1) {
 					perror("mq_send() failed");
+					break;
 				}
 				produced++;
 			}
 			iterated++;
 		}
-//	}
+	}
 
 	if (mq_close(qdes) == -1) {
 		perror("mq_close() failed");
@@ -87,6 +85,6 @@ int main(int argc, char *argv[])
 		perror("mq_unlink() failed");
 		exit(3);
 	}
-
+// test
 	return 0;
 }
