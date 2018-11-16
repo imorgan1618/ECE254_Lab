@@ -40,8 +40,9 @@ int main(int argc, char*argv[])
         	if (mq_receive(qdes, (char *) &number, sizeof(int), 0) == -1) {
              		perror("mq_receive() failed");
 			break;
-        	} else {
+        	} //else {
 			if (number == -1) {
+				perror("RECEIVER -1");
 				break;
 			}
 
@@ -54,7 +55,7 @@ int main(int argc, char*argv[])
              				printf("%d %d %d \n", id, number, i);
 				}
 			}
-       	 	}
+//       	 	}
     	}
 
    if (mq_close(qdes) == -1) {

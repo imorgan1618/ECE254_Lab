@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
     	}
 
 	if (id == -1) {
+		perror("SENDING STOP");
 		if (mq_send(qdes, (char *)&endItem, sizeof(int), 0) == -1) {
 			perror("mq_send() failed");
 		}
