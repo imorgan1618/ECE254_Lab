@@ -8,14 +8,18 @@ LD = gcc
 LDFLAGS = -ggdb
 LDLIBS = -lrt -lpthread -lm
 
-SRCS   = produce.c 
-OBJS   = produce.o
-TARGETS= produce
+OBJS1 = sender.o point.o
+OBJS2 = receiver.o point.o
 
-all: ${TARGETS}
+all: sender.out receiver.out produce
 
+sender.out: $(OBJS1)
+	$(LD) -o $@ $(OBJS1) $(LDFLAGS) $(LDLIBS)
 
-produce: $(OBJS) 
+receiver.out: $(OBJS2)
+	$(LD) -o $@ $(OBJS2) $(LDFLAGS) $(LDLIBS)
+
+produce: produce.o
 	$(LD) $(LDFLAGS) -o $@.out $^ $(LDLIBS) 
 
 %.o: %.c 
@@ -23,6 +27,8 @@ produce: $(OBJS)
 
 %.d: %.c
 	gcc -MM -MF $@ $<
+
+-include $(SRCS:.c=.d)
 
 .PHONY: clean
 clean:
