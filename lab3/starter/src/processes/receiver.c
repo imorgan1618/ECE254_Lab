@@ -63,9 +63,9 @@ int main(int argc, char*argv[])
 				}
 			} 
 
-//			if (number == -1) {
-//				break;
-//			}
+			if (number == -1) {
+				break;
+			}
 		}
 	}
 
@@ -77,5 +77,6 @@ int main(int argc, char*argv[])
 
 	return 0;
 }
+
 
 
