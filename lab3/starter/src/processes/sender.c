@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "point.h"
 
 int spawn(char* program, char** arg_list)
 {
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
 				item = iterated;
 				if (mq_send(qdes, (char *)&item, sizeof(int), 0) == -1) {
 					perror("mq_send() failed");
-						break;
+					break;
 				}
 				produced++;
 			}

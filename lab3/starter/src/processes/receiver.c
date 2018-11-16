@@ -42,7 +42,7 @@ int main(int argc, char*argv[])
 				break;
 			}
 
-			if number == 0 || number == 1() {
+			if (number == 0 || number == 1) {
 				printf("%d %d %d \n", id, number, number);
 			}		
 	
@@ -54,7 +54,7 @@ int main(int argc, char*argv[])
        	 	}
     	}
 
-   if (mq_close(qdes) == -1) {
+   if (mq_unlink(qdes) == -1) {
         perror("mq_close() failed");
         exit(2);
     }
