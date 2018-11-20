@@ -54,6 +54,10 @@ int main(int argc, char *argv[])
 	char* pro_arg_list[6];
 	char* con_arg_list[6];
 
+	int producer_ids[atoi(argv[3])];
+	int consumer_ids[atoi(argv[4])];
+	int kill_ids[atoi(argv[4])];
+
 	if (argc != 5) {
 		printf("Usage: %s <N> <B> <P> <C>\n", argv[0]);
 		exit(1);
@@ -87,47 +91,66 @@ int main(int argc, char *argv[])
 	con_arg_list[3] = argv[4]; // number of consumers
 	con_arg_list[4] = NULL;
 	con_arg_list[5] = NULL;
-    int tmp;
+    //int tmp;
 	for (i = 0; i < num_p; i++) {
         char str[15];
 		sprintf(str, "%d", i);
 		pro_arg_list[4] = str;
-		tmp = spawn("./sender.out", pro_arg_list);
-        printf("%d\n", tmp);
+		producer_ids[i] = spawn("./sender.out", pro_arg_list);
+        //printf("%d\n", tmp);
     }
 
 	for (i = 0; i < num_c; i++) {
 		char str[15];
 		sprintf(str, "%d", i);
 		con_arg_list[4] = str;
-		tmp = spawn("./receiver.out", con_arg_list);
-	    printf("%d\n", tmp );
+		consumer_ids[i] = spawn("./receiver.out", con_arg_list);
+	    //printf("%d\n", tmp );
     }
     // collect the producers
     for (int l = 0; l < num_p; l ++){
-        wait(&status);
+//        wait(&status);
+	waitpid(producer_ids[l], &status, 0);
         if(WIFEXITED(status)){
-            finished ++;    
+            finished ++;
         } else {
             printf("Abnormal exit\n");
         }
         printf("process finished\n");
-    }
+   	fflush(stdout); 
+   }
     // kill the consumers
     printf("killing consumers\n");
     for( int k = 0; k < num_c; k ++){
         char str[15];
-        sprintf(str, "%d", -1);
+        sprintf(str, "%d", -200);
         pro_arg_list[4] = str;
-        spawn("./sender.out", pro_arg_list);
-    }
-    
-    //collect the consumers
-    for( int n = 0; n < num_c; n ++){
-        wait(&status);
-        printf("collected consumer\n");
+        kill_ids[k] = spawn("./sender.out", pro_arg_list);
     }
 
+    for( int n = 0; n < num_c; n ++){
+   //     printf("Waiting on consumer %d\n", n);
+   //     //      wait(&status);
+                printf("Waiting on kill %d\n", n);
+		waitpid(kill_ids[n], &status, 0);
+   //                     printf("collected consumer\n");
+                            }
+    
+    //collect the consumers
+    for( int m = 0; m < num_c; m ++){
+   //     printf("Waiting on consumer %d\n", n);
+//	wait(&status);
+	printf("waiting on: %d\n", consumer_ids[m]);
+	waitpid(consumer_ids[m], &status, 0);
+        printf("collected consumer %d\n", m);
+    }
+        
+  //  for (int o = 0; o < num_c + num_p; o++) {
+    if (mq_unlink("/mailbox1_i2morgan") != 0) {
+                perror("mq_unlink() failed\n");
+                exit(3);
+        }
+//}
     gettimeofday(&tv, NULL);
     g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
 
