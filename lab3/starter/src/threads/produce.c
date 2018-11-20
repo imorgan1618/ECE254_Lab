@@ -71,7 +71,8 @@ int main(int argc, char *argv[])
 
 	pthread_t producer_threads[num_p];
     pthread_t consumer_threads[num_c];
-
+    
+    if (num > 0 && num_p > 0 && num_c > 0 && maxmsg > 0){
 	for (int i = 0; i < num_p ; i++){
 		int* id = malloc(sizeof(int));
 		*id = i;
@@ -95,7 +96,7 @@ int main(int argc, char *argv[])
 	for ( int l = 0; l < num_c; l ++){
         pthread_join(consumer_threads[l], NULL);
 	}
-
+    }
 
 	gettimeofday(&tv, NULL);
     g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
