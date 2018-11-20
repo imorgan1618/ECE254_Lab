@@ -80,13 +80,14 @@ int main(int argc, char *argv[])
 
 	pthread_t producer_threads[num_p];
     pthread_t consumer_threads[num_c];
-    
     if (num > 0 && num_p > 0 && num_c > 0 && maxmsg > 0){
+    printf("starting \n");
 	for (int i = 0; i < num_p ; i++){
 		int* id = malloc(sizeof(int));
 		*id = i;
 		pthread_create(&producer_threads[i], NULL, producer, id);
     }
+    printf("created processes\n");
 	
 	for (int j = 0; j < num_c; j++ ){
 		int* tmp_id = malloc(sizeof(int));
@@ -128,7 +129,8 @@ void* consumer(void* argument){
 		consumed_val = remove_from_buffer( tmp ); // cosume from buff
 		busy_loop(30000);
         printer(consumed_val, *id); // print the squar root
-	    if (consumed_val == -1){ 
+	    //free(tmp);
+        if (consumed_val == -1){ 
             break; // if you get a death sentence die
         }	
 	}
@@ -144,13 +146,14 @@ void* producer(void* argument){
     // Iterate until producer has produced its share of numbers
     for (int iterated = 0; iterated < num; iterated ++){ 
         if ((iterated%num_p) == *id){ // got a match!
-            printf();
+            //printf("Producer: %d, porducing %d \n", *id, iterated);
 			struct node* tmp_p = malloc(sizeof(struct node));
             busy_loop(30000);
 			insert(tmp_p, iterated); // insert num into buffer
 		}
 	}
     free(id); // free it !
+    //printf("producer %d, finished", *id);
 	pthread_exit(NULL);
 }
 
