@@ -23,6 +23,16 @@ void sig_handler(int sig)
 	g_continue = false;
 }
 
+void busy_loop(int iters)
+{
+  volatile int sink;
+  do
+  {
+    sink = 0;
+  } while (--iters > 0);
+  (void)sink;
+}
+
 int main(int argc, char*argv[])
 {
 	mqd_t qdes;
@@ -59,6 +69,7 @@ int main(int argc, char*argv[])
 
 			for (int i = 0; i < number; i++) {
 				if (i*i == number) {
+                    busy_loop(30000);
 					printf("%d %d %d \n", id, number, i);
 				}
 			} 

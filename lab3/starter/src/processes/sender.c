@@ -12,6 +12,16 @@
 #include "common.h"
 #include "point.h"
 
+void busy_loop(int iters)
+{
+  volatile int sink;
+  do
+  {
+    sink = 0;
+  } while (--iters > 0);
+  (void)sink;
+}
+
 int main(int argc, char *argv[])
 {
 	mqd_t qdes;
@@ -49,6 +59,7 @@ int main(int argc, char *argv[])
 			int item;
 			if ((iterated%num_p) == id) {
 				item = iterated;
+                busy_loop(30000);
 				if (mq_send(qdes, (char *)&item, sizeof(int), 0) == -1) {
 					perror("mq_send() failed\n");
 					break;
