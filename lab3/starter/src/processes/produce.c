@@ -105,22 +105,21 @@ int main(int argc, char *argv[])
 		wait(&status);
 		if (WIFEXITED(status)) {
 			finished++;
-			if (finished == num_p) {
+			if (finished >= num_p) {
         			for (j = 0; j < num_c; j++) {
 					char str[15];
 	              			sprintf(str, "%d", -1);
                 			pro_arg_list[4] = str;
                 			spawn("./sender.out", pro_arg_list);
 				}
-
+				break;
 			}
 		} else {
-			printf("Abnormal exit");
+			printf("Abnormal exit\n");
 		}
 	}
 
-
-        gettimeofday(&tv, NULL);
+	 gettimeofday(&tv, NULL);
         g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
 
     	printf("System execution time: %.6lf seconds\n", \

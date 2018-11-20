@@ -39,9 +39,9 @@ int main(int argc, char*argv[])
 	attr.mq_msgsize = sizeof(int);
 	attr.mq_flags = 0;
 	
-	qdes = mq_open(qname, O_RDONLY, mode, &attr);
+	qdes = mq_open(qname, O_RDONLY | O_CREAT, mode, &attr);
 	if (qdes == -1) {
-		perror("mq_open()");
+		perror("mq_open() in receiver\n");
 		exit(1);
 	}
 
@@ -50,7 +50,7 @@ int main(int argc, char*argv[])
 	while (1) {
 		int number;
 		if (mq_receive(qdes, (char *)&number, sizeof(int)*QUEUE_SIZE, 0) == -1) {
-			perror("mq_receive() failed");
+			perror("mq_receive() failed\n");
 			break;			
 		} else {
 			if (number == 0 || number == 1) {
@@ -69,9 +69,8 @@ int main(int argc, char*argv[])
 		}
 	}
 
-	printf("Closing consumer");
 	if (mq_close(qdes) == -1) {
-		perror("mq_close() failed in receiver");
+		perror("mq_close() failed in receiver\n");
 		exit(2);
 	}
 

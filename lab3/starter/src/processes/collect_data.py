@@ -7,7 +7,7 @@ import sys
 # SETTINGS
 PROG = "./produce.out"
 # FOR TESTING: reduce this number when debugging
-X = 500  # number of times to repeat the test
+X = 1  # number of times to repeat the test
 
 # This data structure holds the raw data for each test run
 times = []
