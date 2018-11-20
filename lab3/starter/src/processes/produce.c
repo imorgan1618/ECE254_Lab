@@ -64,6 +64,15 @@ int main(int argc, char *argv[])
 	num_p = atoi(argv[3]);  /* number of producers        */
 	num_c = atoi(argv[4]);  /* number of consumers        */
 	
+	if (atoi(argv[1]) < 1 || atoi(argv[2]) < 1 || atoi(argv[3]) < 1 || atoi(argv[4]) < 1) {
+        	gettimeofday(&tv, NULL);
+        	g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
+
+        	printf("System execution time: %.6lf seconds\n", \
+        	    g_time[1] - g_time[0]);
+	        exit(0);
+	}
+
 	pro_arg_list[0] = "/mailbox1_i2morgan";
 	pro_arg_list[1] = argv[1];
 	pro_arg_list[2] = argv[2];
