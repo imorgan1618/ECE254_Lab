@@ -37,10 +37,6 @@ int spawn (char* program, char** arg_list)
   	}
 }
 
-void kill_signal( int num_c, char* pro_arg_list){
-    
-
-}
 
 int main(int argc, char *argv[])
 {
