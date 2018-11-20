@@ -37,6 +37,7 @@ int spawn (char* program, char** arg_list)
   	}
 }
 
+
 int main(int argc, char *argv[])
 {
 //	int num = 0;
@@ -45,7 +46,7 @@ int main(int argc, char *argv[])
 	int num_p = 0;
 	int num_c = 0;
 	int i = 0;
-	int j = 0;
+	//int j = 0;
 	int status;
 	int finished = 0;
 
@@ -74,55 +75,63 @@ int main(int argc, char *argv[])
 	}
 
 	pro_arg_list[0] = "/mailbox1_i2morgan";
-	pro_arg_list[1] = argv[1];
-	pro_arg_list[2] = argv[2];
-	pro_arg_list[3] = argv[3];
+	pro_arg_list[1] = argv[1]; // num of items to produce
+	pro_arg_list[2] = argv[2]; // buffer size
+	pro_arg_list[3] = argv[3]; // number of producers
 	pro_arg_list[4] = NULL;
 	pro_arg_list[5] = NULL;	
 
 	con_arg_list[0] = "/mailbox1_i2morgan";
-	con_arg_list[1] = argv[1];
-	con_arg_list[2] = argv[2];
-	con_arg_list[3] = argv[4];
+	con_arg_list[1] = argv[1]; // num of items to produce
+	con_arg_list[2] = argv[2]; // buffer size
+	con_arg_list[3] = argv[4]; // number of consumers
 	con_arg_list[4] = NULL;
 	con_arg_list[5] = NULL;
-
+    int tmp;
 	for (i = 0; i < num_p; i++) {
-        	char str[15];
+        char str[15];
 		sprintf(str, "%d", i);
 		pro_arg_list[4] = str;
-		spawn("./sender.out", pro_arg_list);
-        }
+		tmp = spawn("./sender.out", pro_arg_list);
+        printf("%d\n", tmp);
+    }
 
 	for (i = 0; i < num_c; i++) {
 		char str[15];
 		sprintf(str, "%d", i);
 		con_arg_list[4] = str;
-		spawn("./receiver.out", con_arg_list);
-	}
+		tmp = spawn("./receiver.out", con_arg_list);
+	    printf("%d\n", tmp );
+    }
+    // collect the producers
+    for (int l = 0; l < num_p; l ++){
+        wait(&status);
+        if(WIFEXITED(status)){
+            finished ++;    
+        } else {
+            printf("Abnormal exit\n");
+        }
+        printf("process finished\n");
+    }
+    // kill the consumers
+    printf("killing consumers\n");
+    for( int k = 0; k < num_c; k ++){
+        char str[15];
+        sprintf(str, "%d", -1);
+        pro_arg_list[4] = str;
+        spawn("./sender.out", pro_arg_list);
+    }
+    
+    //collect the consumers
+    for( int n = 0; n < num_c; n ++){
+        wait(&status);
+        printf("collected consumer\n");
+    }
 
-	for (i = num_p + num_c; i > 0; i--) {
-		wait(&status);
-		if (WIFEXITED(status)) {
-			finished++;
-			if (finished >= num_p) {
-        			for (j = 0; j < num_c; j++) {
-					char str[15];
-	              			sprintf(str, "%d", -1);
-                			pro_arg_list[4] = str;
-                			spawn("./sender.out", pro_arg_list);
-				}
-				break;
-			}
-		} else {
-			printf("Abnormal exit\n");
-		}
-	}
+    gettimeofday(&tv, NULL);
+    g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
 
-	 gettimeofday(&tv, NULL);
-        g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
-
-    	printf("System execution time: %.6lf seconds\n", \
+    printf("System execution time: %.6lf seconds\n", \
             g_time[1] - g_time[0]);
 	exit(0);
 }

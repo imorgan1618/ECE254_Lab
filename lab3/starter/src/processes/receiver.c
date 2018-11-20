@@ -63,7 +63,12 @@ int main(int argc, char*argv[])
 			perror("mq_receive() failed\n");
 			break;			
 		} else {
-			if (number == 0 || number == 1) {
+
+			if (number == -1) {
+				break; // death pill
+			}		
+            // normal loop function
+            if (number == 0 || number == 1) {
 				printf("%d %d %d\n", id, number, number);
 			}
 
@@ -73,10 +78,6 @@ int main(int argc, char*argv[])
 					printf("%d %d %d \n", id, number, i);
 				}
 			} 
-
-			if (number == -1) {
-				break;
-			}
 		}
 	}
 

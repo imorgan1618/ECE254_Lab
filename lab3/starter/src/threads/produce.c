@@ -139,7 +139,6 @@ void* consumer(void* argument){
 
 void* producer(void* argument){
 	int* id = (int*) argument;
-    int produced = 0; // Items this producer has produced
     //int iterated = 0; // Index or num times iterated
 
     // Iterate until producer has produced its share of numbers
@@ -148,9 +147,7 @@ void* producer(void* argument){
 			struct node* tmp_p = malloc(sizeof(struct node));
             busy_loop(30000);
 			insert(tmp_p, iterated); // insert num into buffer
-            produced ++; //increment produced
 		}
-        iterated ++; //increment iterated
 	}
     free(id); // free it !
 	pthread_exit(NULL);
