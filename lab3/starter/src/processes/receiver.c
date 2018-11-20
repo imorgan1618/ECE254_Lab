@@ -16,13 +16,6 @@
 
 #define _XOPEN_SOURCE 600
 
-bool g_continue = true;
-
-void sig_handler(int sig)
-{
-	g_continue = false;
-}
-
 void busy_loop(int iters)
 {
   volatile int sink;
@@ -55,26 +48,26 @@ int main(int argc, char*argv[])
 		exit(1);
 	}
 
-//	signal(SIGINT, sig_handler);
-
 	while (1) {
 		int number;
-		if (mq_receive(qdes, (char *)&number, sizeof(int)*QUEUE_SIZE, 0) == -1) {
+		
+		if (mq_receive(qdes,(char *)&number, sizeof(int)*QUEUE_SIZE, 0) == -1) {
+			printf("Number: %d\n", number);
 			perror("mq_receive() failed\n");
 			break;			
 		} else {
-
-			if (number == -1) {
+			if (number == -200) {
 				break; // death pill
-			}		
-            // normal loop function
-            if (number == 0 || number == 1) {
+			}
+		
+            		// normal loop function
+            		if (number == 0 || number == 1) {
 				printf("%d %d %d\n", id, number, number);
 			}
 
 			for (int i = 0; i < number; i++) {
 				if (i*i == number) {
-                    busy_loop(30000);
+                    			busy_loop(30000);
 					printf("%d %d %d \n", id, number, i);
 				}
 			} 
@@ -85,7 +78,6 @@ int main(int argc, char*argv[])
 		perror("mq_close() failed in receiver\n");
 		exit(2);
 	}
-
 	return 0;
 }
 

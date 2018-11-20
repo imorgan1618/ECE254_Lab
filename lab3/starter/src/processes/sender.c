@@ -27,12 +27,12 @@ int main(int argc, char *argv[])
 	mqd_t qdes;
 	char *qname = NULL;
 	
-	int endItem = -1;
+	int pill = -200;
 
 	int num = atoi(argv[1]);
 	int num_p = atoi(argv[3]);
-	int id = atoi(argv[4]); 
-
+	int id = atoi(argv[4]);
+        
 	mode_t mode = S_IRUSR | S_IWUSR;
 	struct mq_attr attr;
 
@@ -48,8 +48,9 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (id == -1) {
-		if (mq_send(qdes, (char *)&endItem, sizeof(int), 0) == -1) {
+	if (atoi(argv[4]) == -200) {
+		fflush(stdout);
+		if (mq_send(qdes, (char *)&pill, sizeof(int), 0) == -1) {
 	              perror("mq_send() failed in sender\n");
                 }
 	} else {
@@ -57,7 +58,7 @@ int main(int argc, char *argv[])
 			int item;
 			if ((iterated%num_p) == id) {
 				item = iterated;
-                busy_loop(30000);
+          		        busy_loop(30000);
 				if (mq_send(qdes, (char *)&item, sizeof(int), 0) == -1) {
 					perror("mq_send() failed\n");
 					break;
@@ -69,11 +70,6 @@ int main(int argc, char *argv[])
 	if (mq_close(qdes) == -1) {
 		perror("mq_close() failed\n");
 		exit(2);
-	}
-
-	if (mq_unlink(qname) != 0) {
-		perror("mq_unlink() failed\n");
-		exit(3);
 	}
 
 	return 0;
