@@ -12,23 +12,6 @@
 #include "common.h"
 #include "point.h"
 
-int spawn(char* program, char** arg_list)
-{
-    pid_t child_pid;
-    
-    /* Duplicate this process. */
-    child_pid = fork();
-    if (child_pid != 0) {
-        /* This is the parent process. */
-        return child_pid;
-    } else {
-        execvp(program, arg_list);
-        fprintf(stderr, "an error occurred in execvp\n");
-        abort();
-    }
-}
-
-
 int main(int argc, char *argv[])
 {
 	mqd_t qdes;
@@ -53,13 +36,13 @@ int main(int argc, char *argv[])
 
 	qdes = mq_open(qname, O_RDWR | O_CREAT, mode, &attr);
 	if (qdes == -1) {
-		perror("mq_open() failed");
+		perror("mq_open() failed in sender\n");
 		exit(1);
 	}
 
 	if (id == -1) {
 		if (mq_send(qdes, (char *)&endItem, sizeof(int), 0) == -1) {
-	              perror("mq_send() failed");
+	              perror("mq_send() failed in sender\n");
                 }
 	} else {
 		while (produced < num/num_p) {
@@ -67,7 +50,7 @@ int main(int argc, char *argv[])
 			if ((iterated%num_p) == id) {
 				item = iterated;
 				if (mq_send(qdes, (char *)&item, sizeof(int), 0) == -1) {
-					perror("mq_send() failed");
+					perror("mq_send() failed\n");
 					break;
 				}
 				produced++;
@@ -77,14 +60,14 @@ int main(int argc, char *argv[])
 	}
 
 	if (mq_close(qdes) == -1) {
-		perror("mq_close() failed");
+		perror("mq_close() failed\n");
 		exit(2);
 	}
 
 	if (mq_unlink(qname) != 0) {
-		perror("mq_unlink() failed");
+		perror("mq_unlink() failed\n");
 		exit(3);
 	}
-// test
+
 	return 0;
 }
