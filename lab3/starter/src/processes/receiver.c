@@ -16,13 +16,6 @@
 
 #define _XOPEN_SOURCE 600
 
-bool g_continue = true;
-
-void sig_handler(int sig)
-{
-	g_continue = false;
-}
-
 void busy_loop(int iters)
 {
   volatile int sink;
@@ -42,9 +35,6 @@ int main(int argc, char*argv[])
 	int id = atoi(argv[4]);
 	int pt;
 	int sq;
-	char pill[15];
-	sprintf(pill, "%s", "pill");
-	//pill  = "pill";
 
 	qname ="/mailbox1_i2morgan";
 
@@ -58,35 +48,24 @@ int main(int argc, char*argv[])
 		exit(1);
 	}
 
-//	signal(SIGINT, sig_handler);
-
 	while (1) {
-		char message[15];
 		int number;
-		//printf("Number: %d\n", number);
-		//printf("receiving");
+		
 		if (mq_receive(qdes,(char *)&number, sizeof(int)*QUEUE_SIZE, 0) == -1) {
 			printf("Number: %d\n", number);
 			perror("mq_receive() failed\n");
 			break;			
-		} else {;
-		//	printf("Inside the else\n");
-	//		printf("Numer is: %c\n", &message);
-			printf("Number is %d\n", number);
-			
+		} else {
 			if (number == -200) {
-				printf("Killing Consumer\n");
 				break; // death pill
 			}
-                 //       printf("Number: %d\n", atoi(message));
-		//	number = atoi(message);		
+		
             		// normal loop function
             		if (number == 0 || number == 1) {
 				printf("%d %d %d\n", id, number, number);
 			}
 
 			for (int i = 0; i < number; i++) {
-				printf("I*I is: %d, Number is: %d \n", i*i, number);
 				if (i*i == number) {
                     			busy_loop(30000);
 					printf("%d %d %d \n", id, number, i);
@@ -94,12 +73,11 @@ int main(int argc, char*argv[])
 			} 
 		}
 	}
-	printf("Out of consumer logic\n");
+
 	if (mq_close(qdes) == -1) {
 		perror("mq_close() failed in receiver\n");
 		exit(2);
 	}
-	printf("Consumer is now killed\n");
 	return 0;
 }
 
