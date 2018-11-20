@@ -37,6 +37,11 @@ int spawn (char* program, char** arg_list)
   	}
 }
 
+void kill_signal( int num_c, char* pro_arg_list){
+    
+
+}
+
 int main(int argc, char *argv[])
 {
 //	int num = 0;
@@ -105,18 +110,20 @@ int main(int argc, char *argv[])
 		wait(&status);
 		if (WIFEXITED(status)) {
 			finished++;
-			if (finished >= num_p) {
-        			for (j = 0; j < num_c; j++) {
-					char str[15];
-	              			sprintf(str, "%d", -1);
-                			pro_arg_list[4] = str;
-                			spawn("./sender.out", pro_arg_list);
-				}
-				break;
-			}
+			
 		} else {
 			printf("Abnormal exit\n");
 		}
+        
+        if (finished >= num_p) {
+            for (j = 0; j < num_c; j++) {
+                char str[15];
+                sprintf(str, "%d", -1);
+                pro_arg_list[4] = str;
+                spawn("./sender.out", pro_arg_list);
+            }
+            break;
+			}
 	}
 
 	 gettimeofday(&tv, NULL);

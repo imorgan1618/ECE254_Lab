@@ -27,8 +27,6 @@ int main(int argc, char *argv[])
 	mqd_t qdes;
 	char *qname = NULL;
 	
-	int produced = 0;
-	int iterated = 0;
 	int endItem = -1;
 
 	int num = atoi(argv[1]);
@@ -55,7 +53,7 @@ int main(int argc, char *argv[])
 	              perror("mq_send() failed in sender\n");
                 }
 	} else {
-		while (produced < num/num_p) {
+		for (int iterated = 0; iterated < num; iterated ++){
 			int item;
 			if ((iterated%num_p) == id) {
 				item = iterated;
@@ -64,9 +62,7 @@ int main(int argc, char *argv[])
 					perror("mq_send() failed\n");
 					break;
 				}
-				produced++;
 			}
-			iterated++;
 		}
 	}
 
