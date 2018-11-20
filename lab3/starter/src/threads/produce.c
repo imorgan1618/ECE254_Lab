@@ -45,6 +45,15 @@ int num;
 sem_t spaces;
 sem_t items;
 
+void busy_loop(int iters)
+{
+  volatile int sink;
+  do
+  {
+    sink = 0;
+  } while (--iters > 0);
+  (void)sink;
+}
 
 int main(int argc, char *argv[])
 {
@@ -117,7 +126,8 @@ void* consumer(void* argument){
     while (1) {	
         struct node *tmp = malloc(sizeof(struct node));
 		consumed_val = remove_from_buffer( tmp ); // cosume from buff
-		printer(consumed_val, *id); // print the squar root
+		busy_loop(30000);
+        printer(consumed_val, *id); // print the squar root
 	    if (consumed_val == -1){ 
             break; // if you get a death sentence die
         }	
@@ -136,6 +146,7 @@ void* producer(void* argument){
     for (int iterated = 0; iterated < num; iterated ++){ 
         if ((iterated%num_p) == *id){ // got a match!
 			struct node* tmp_p = malloc(sizeof(struct node));
+            busy_loop(30000);
 			insert(tmp_p, iterated); // insert num into buffer
             produced ++; //increment produced
 		}
