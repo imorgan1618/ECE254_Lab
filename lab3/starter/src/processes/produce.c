@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 	int num_p = 0;
 	int num_c = 0;
 	int i = 0;
-	int j = 0;
+	//int j = 0;
 	int status;
 	int finished = 0;
 
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 	con_arg_list[5] = NULL;
 
 	for (i = 0; i < num_p; i++) {
-        	char str[15];
+        char str[15];
 		sprintf(str, "%d", i);
 		pro_arg_list[4] = str;
 		spawn("./sender.out", pro_arg_list);
@@ -102,25 +102,28 @@ int main(int argc, char *argv[])
 		spawn("./receiver.out", con_arg_list);
 	}
 
-	for (i = num_p + num_c; i > 0; i--) {
-		wait(&status);
-		if (WIFEXITED(status)) {
-			finished++;
-			
-		} else {
-			printf("Abnormal exit\n");
-		}
-        
-        if (finished >= num_p) {
-            for (j = 0; j < num_c; j++) {
-                char str[15];
-                sprintf(str, "%d", -1);
-                pro_arg_list[4] = str;
-                spawn("./sender.out", pro_arg_list);
-            }
-            break;
-			}
-	}
+    for (int l = 0; l < num_p; l ++){
+        wait(&status);
+        if(WIFEXITED(status)){
+            finished ++;    
+        } else {
+            printf("Abnormal exit\n");
+        }
+        printf("process finished\n");
+    }
+    
+    printf("killing consumers\n");
+    for( int k = 0; k < num_c; k ++){
+        char str[15];
+        sprintf(str, "%d", -1);
+        pro_arg_list[4] = str;
+        spawn("./sender.out", pro_arg_list);
+    }
+    
+    for( int n = 0; n < num_c; n ++){
+        wait(&status);
+        printf("collected consumer\n");
+    }
 
 	 gettimeofday(&tv, NULL);
         g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
