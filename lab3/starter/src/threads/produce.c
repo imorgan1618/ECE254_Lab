@@ -144,6 +144,7 @@ void* producer(void* argument){
     // Iterate until producer has produced its share of numbers
     for (int iterated = 0; iterated < num; iterated ++){ 
         if ((iterated%num_p) == *id){ // got a match!
+            printf();
 			struct node* tmp_p = malloc(sizeof(struct node));
             busy_loop(30000);
 			insert(tmp_p, iterated); // insert num into buffer
