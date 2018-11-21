@@ -17,5 +17,12 @@ src/
     - Contains the skeleton for the Lab 3 Deliverable
     processes/
         - Your produce.c should create separate processes for Producers and Consumers
+        - Run make to build the project 
+        - Collect_data.py contains test cases 
+        - sender.c contains the producer code
+        - receiver.c contains the consumer code
+        - produce.c contains the main function code to spawn consumers and producers
     threads/
         - Your produce.c should create separate threads for Producers and Consumers
+        - Run make to build the project 
+        - Collect_data.py contains test cases 
