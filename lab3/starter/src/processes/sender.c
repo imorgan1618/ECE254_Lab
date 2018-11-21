@@ -10,7 +10,6 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "point.h"
 
 void busy_loop(int iters)
 {
@@ -26,7 +25,8 @@ int main(int argc, char *argv[])
 {
 	mqd_t qdes;
 	char *qname = NULL;
-	
+
+	// Set pill to send when complete	
 	int pill = -200;
 
 	int num = atoi(argv[1]);
@@ -48,8 +48,8 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	// Check if message is death pill
 	if (atoi(argv[4]) == -200) {
-		fflush(stdout);
 		if (mq_send(qdes, (char *)&pill, sizeof(int), 0) == -1) {
 	              perror("mq_send() failed in sender\n");
                 }
@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
 			int item;
 			if ((iterated%num_p) == id) {
 				item = iterated;
+				// Add busy loop for testing purposes
           		        busy_loop(30000);
 				if (mq_send(qdes, (char *)&item, sizeof(int), 0) == -1) {
 					perror("mq_send() failed\n");

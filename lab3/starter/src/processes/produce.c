@@ -39,14 +39,11 @@ int spawn (char* program, char** arg_list)
 
 
 int main(int argc, char *argv[])
-{
-//	int num = 0;
-//	int maxmsg = 0;
-	
+{	
 	int num_p = 0;
 	int num_c = 0;
 	int i = 0;
-	//int j = 0;
+	
 	int status;
 	int finished = 0;
 
@@ -54,6 +51,7 @@ int main(int argc, char *argv[])
 	char* pro_arg_list[6];
 	char* con_arg_list[6];
 
+	// IDs of processes
 	int producer_ids[atoi(argv[3])];
 	int consumer_ids[atoi(argv[4])];
 	int kill_ids[atoi(argv[4])];
@@ -62,10 +60,11 @@ int main(int argc, char *argv[])
 		printf("Usage: %s <N> <B> <P> <C>\n", argv[0]);
 		exit(1);
 	}
+
+	// Get first time stamp
         gettimeofday(&tv, NULL);
         g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
-//	num = atoi(argv[1]);	/* number of items to produce */
-//	maxmsg = atoi(argv[2]); /* buffer size                */
+
 	num_p = atoi(argv[3]);  /* number of producers        */
 	num_c = atoi(argv[4]);  /* number of consumers        */
 	
@@ -92,55 +91,60 @@ int main(int argc, char *argv[])
 	con_arg_list[4] = NULL;
 	con_arg_list[5] = NULL;
   
+	// Spawn the producers
 	for (i = 0; i < num_p; i++) {
-        char str[15];
+        	char str[15];
 		sprintf(str, "%d", i);
 		pro_arg_list[4] = str;
 		producer_ids[i] = spawn("./sender.out", pro_arg_list);
-    }
+    	}
 
+	// Spawn the consumers
 	for (i = 0; i < num_c; i++) {
 		char str[15];
 		sprintf(str, "%d", i);
 		con_arg_list[4] = str;
 		consumer_ids[i] = spawn("./receiver.out", con_arg_list);
-    }
+    	}
 
-    // collect the producers
-    for (int l = 0; l < num_p; l ++){
-	waitpid(producer_ids[l], &status, 0);
-        if(WIFEXITED(status)){
-            finished ++;
-        } else {
-            printf("Abnormal exit\n");
-        }
-   }
-    // kill the consumers
-    for( int k = 0; k < num_c; k ++){
-        char str[15];
-        sprintf(str, "%d", -200);
-        pro_arg_list[4] = str;
-        kill_ids[k] = spawn("./sender.out", pro_arg_list);
-    }
-
-    for( int n = 0; n < num_c; n ++){
-	waitpid(kill_ids[n], &status, 0);
-     }
+    	// collect the producers
+    	for (int l = 0; l < num_p; l ++){
+		waitpid(producer_ids[l], &status, 0);
+        	if(WIFEXITED(status)){
+            		finished ++;
+        	} else {
+            		printf("Abnormal exit\n");
+        	}
+   	}
     
-    //collect the consumers
-    for( int m = 0; m < num_c; m ++){
-	waitpid(consumer_ids[m], &status, 0);
-    }
+	// kill the consumers
+    	for( int k = 0; k < num_c; k ++){
+        	char str[15];
+        	sprintf(str, "%d", -200);
+        	pro_arg_list[4] = str;
+        	kill_ids[k] = spawn("./sender.out", pro_arg_list);
+    	}
+
+	// collect the killers
+    	for( int n = 0; n < num_c; n ++){
+        	waitpid(kill_ids[n], &status, 0);
+     	}
+    
+    	// collect the consumers
+    	for( int m = 0; m < num_c; m ++){
+		waitpid(consumer_ids[m], &status, 0);
+    	}
         
-    if (mq_unlink("/mailbox1_i2morgan") != 0) {
+    	if (mq_unlink("/mailbox1_i2morgan") != 0) {
                 perror("mq_unlink() failed\n");
                 exit(3);
-    }
+    	}
 
-    gettimeofday(&tv, NULL);
-    g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
+	// Grab second time stamp
+    	gettimeofday(&tv, NULL);
+    	g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
 
-    printf("System execution time: %.6lf seconds\n", \
+    	printf("System execution time: %.6lf seconds\n", \
             g_time[1] - g_time[0]);
 	exit(0);
 }

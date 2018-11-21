@@ -12,7 +12,6 @@
 #include <unistd.h>
 
 #include "common.h"
-#include "point.h"
 
 #define _XOPEN_SOURCE 600
 
@@ -33,8 +32,6 @@ int main(int argc, char*argv[])
 	mode_t mode = S_IRUSR | S_IWUSR;
 	struct mq_attr attr;
 	int id = atoi(argv[4]);
-	int pt;
-	int sq;
 
 	qname ="/mailbox1_i2morgan";
 
@@ -52,7 +49,6 @@ int main(int argc, char*argv[])
 		int number;
 		
 		if (mq_receive(qdes,(char *)&number, sizeof(int)*QUEUE_SIZE, 0) == -1) {
-			printf("Number: %d\n", number);
 			perror("mq_receive() failed\n");
 			break;			
 		} else {
@@ -67,6 +63,7 @@ int main(int argc, char*argv[])
 
 			for (int i = 0; i < number; i++) {
 				if (i*i == number) {
+					// Busy loop for testing purposes
                     			busy_loop(30000);
 					printf("%d %d %d \n", id, number, i);
 				}
