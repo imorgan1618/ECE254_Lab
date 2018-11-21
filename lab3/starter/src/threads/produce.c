@@ -101,19 +101,10 @@ int main(int argc, char *argv[])
     //printf("PRODUCERS ARE DONE \n");  
     
     for ( int m = 0; m < num_c; m ++){
-        //printf("sending pill %d\n", m);
         
         struct node *death = malloc(sizeof(struct node));
         insert(death, -1);
-        //free(death);
     }
-    
-    //printf("SENT ALL DA PILLS\n");
-    
-    //for (int l = 0; l < num_c; l ++ ){
-      //  int p = consumer_threads[l];
-    //}
-    //printf("accessed the entire array \n");
     
     for ( int l = 0; l < num_c; l ++){
         pthread_join(consumer_threads[l], NULL);
@@ -142,7 +133,6 @@ void* consumer(void* argument){
         busy_loop(30000);
         printer(consumed_val, *id); // print the squar root
         free(tmp);
-        //printf("consuming %d \n", *id);
         if (consumed_val == -1){ 
             break; // if you get a death sentence die
         }   
@@ -154,16 +144,12 @@ void* consumer(void* argument){
 
 void* producer(void* argument){
     int* id = (int*) argument;
-    //int produced = 0; // Items this producer has produced
-    //int iterated = 0; // Index or num times iterated
     for (int iterated = 0; iterated < num; iterated ++){ 
         if ((iterated%num_p) == *id){ // got a match!
             struct node* tmp_p = malloc(sizeof(struct node));
             busy_loop(30000);
             insert(tmp_p, iterated); // insert num into buffer
-            //produced ++; //increment produced
         }
-        //iterated ++; //increment iterated
     }
     free(id); // free it !
     pthread_exit(NULL);
@@ -187,7 +173,6 @@ void insert(struct node* tmp_p, int i){
     buffer.size ++; // increase the buffer count
     pthread_mutex_unlock(&(buffer.sem)); // unlock the buff
     sem_post(&items); // post to items
-    //free(tmp_p);
 }
 
 int remove_from_buffer( struct node * tmp){
