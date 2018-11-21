@@ -1,4 +1,6 @@
-// Use this to see if a number has an integer snuare root
+
+
+
 #define EPS 1.E-7
 #include <string.h>
 #include <stdio.h>
@@ -15,8 +17,8 @@
 #include <semaphore.h>
 
 struct node {
-	int  value;
-	struct node *next;
+    int  value;
+    struct node *next;
  };
 
 struct single_list {
@@ -45,8 +47,7 @@ int num;
 sem_t spaces;
 sem_t items;
 
-void busy_loop(int iters)
-{
+void busy_loop(int iters){
   volatile int sink;
   do
   {
@@ -57,159 +58,171 @@ void busy_loop(int iters)
 
 int main(int argc, char *argv[])
 {
-	int maxmsg;
-	int num_c;
-	struct timeval tv;	
+    int maxmsg;
+    int num_c;
+    struct timeval tv;  
 
-	if (argc != 5) {
-		printf("Usage: %s <N> <B> <P> <C>\n", argv[0]);
-		exit(1);
-	}
-
-	gettimeofday(&tv, NULL);
-	g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
-
-	num = atoi(argv[1]);	/* number of items to produce */
-	maxmsg = atoi(argv[2]); /* buffer size                */
-	num_p = atoi(argv[3]);  /* number of producers        */
-	num_c = atoi(argv[4]);  /* number of consumers        */
-
-	sem_init( &spaces, 0, maxmsg);
-	sem_init( &items, 0, 0);
-	single_list_init(buffer);
-
-	pthread_t producer_threads[num_p];
-    pthread_t consumer_threads[num_c];
-    if (num > 0 && num_p > 0 && num_c > 0 && maxmsg > 0){
-    printf("starting \n");
-	for (int i = 0; i < num_p ; i++){
-		int* id = malloc(sizeof(int));
-		*id = i;
-		pthread_create(&producer_threads[i], NULL, producer, id);
+    if (argc != 5) {
+        printf("Usage: %s <N> <B> <P> <C>\n", argv[0]);
+        exit(1);
     }
-    printf("created processes\n");
-	
-	for (int j = 0; j < num_c; j++ ){
-		int* tmp_id = malloc(sizeof(int));
-		*tmp_id = j;
-		pthread_create(&consumer_threads[j], NULL, consumer, tmp_id);
-	}
-	
-	for( int k = 0; k < num_p; k ++){
-		pthread_join(producer_threads[k], NULL);
-	}
+
+    gettimeofday(&tv, NULL);
+    g_time[0] = (tv.tv_sec) + tv.tv_usec/1000000.;
+
+    num = atoi(argv[1]);    /* number of items to produce */
+    maxmsg = atoi(argv[2]); /* buffer size                */
+    num_p = atoi(argv[3]);  /* number of producers        */
+    num_c = atoi(argv[4]);  /* number of consumers        */
+
+    sem_init( &spaces, 0, maxmsg);
+    sem_init( &items, 0, 0);
+    single_list_init(buffer);
+
+    pthread_t producer_threads[num_p];
+    pthread_t consumer_threads[num_c];
+
+    if (num_p >0 && num_c > 0 && maxmsg > 0 && num > 0){
+    for (int i = 0; i < num_p ; i++){
+        int* id = malloc(sizeof(int));
+        *id = i;
+        pthread_create(&producer_threads[i], NULL, producer, id);
+    }
+    
+    for (int j = 0; j < num_c; j++ ){
+        int* tmp_id = malloc(sizeof(int));
+        *tmp_id = j;
+        pthread_create(&consumer_threads[j], NULL, consumer, tmp_id);
+    }
+    
+    for( int k = 0; k < num_p; k ++){
+        pthread_join(producer_threads[k], NULL);
+    }
+    //printf("PRODUCERS ARE DONE \n");  
     
     for ( int m = 0; m < num_c; m ++){
-        insert(malloc(sizeof(struct node)), -1);
-    }
+        //printf("sending pill %d\n", m);
         
-	for ( int l = 0; l < num_c; l ++){
+        struct node *death = malloc(sizeof(struct node));
+        insert(death, -1);
+        //free(death);
+    }
+    
+    //printf("SENT ALL DA PILLS\n");
+    
+    //for (int l = 0; l < num_c; l ++ ){
+      //  int p = consumer_threads[l];
+    //}
+    //printf("accessed the entire array \n");
+    
+    for ( int l = 0; l < num_c; l ++){
         pthread_join(consumer_threads[l], NULL);
-	}
+    }
     }
 
-	gettimeofday(&tv, NULL);
+    gettimeofday(&tv, NULL);
     g_time[1] = (tv.tv_sec) + tv.tv_usec/1000000.;
 
     printf("System execution time: %.6lf seconds\n", \
-        	g_time[1] - g_time[0]);
-	
+            g_time[1] - g_time[0]);
+    
     // Destroy the sems and mutex
     sem_destroy( &spaces );
-	sem_destroy( &items );
+    sem_destroy( &items );
     pthread_mutex_destroy( &(buffer.sem));
-	exit(0);
-}
+    exit(0);
+    }
 
 void* consumer(void* argument){
-	int* id = (int*) argument;
-	int consumed_val = -1;
-    while (1) {	
+    int* id = (int*) argument;
+    int consumed_val = -1;
+    while (1) { 
         struct node *tmp = malloc(sizeof(struct node));
-		consumed_val = remove_from_buffer( tmp ); // cosume from buff
-		busy_loop(30000);
+        consumed_val = remove_from_buffer( tmp ); // consume from buff
+        busy_loop(30000);
         printer(consumed_val, *id); // print the squar root
-	    //free(tmp);
+        free(tmp);
+        //printf("consuming %d \n", *id);
         if (consumed_val == -1){ 
             break; // if you get a death sentence die
-        }	
-	}
+        }   
+    }
     free(id); // free the id
     pthread_exit(NULL);
 }
 
 
 void* producer(void* argument){
-	int* id = (int*) argument;
+    int* id = (int*) argument;
+    //int produced = 0; // Items this producer has produced
     //int iterated = 0; // Index or num times iterated
-
-    // Iterate until producer has produced its share of numbers
     for (int iterated = 0; iterated < num; iterated ++){ 
         if ((iterated%num_p) == *id){ // got a match!
-            //printf("Producer: %d, porducing %d \n", *id, iterated);
-			struct node* tmp_p = malloc(sizeof(struct node));
+            struct node* tmp_p = malloc(sizeof(struct node));
             busy_loop(30000);
-			insert(tmp_p, iterated); // insert num into buffer
-		}
-	}
+            insert(tmp_p, iterated); // insert num into buffer
+            //produced ++; //increment produced
+        }
+        //iterated ++; //increment iterated
+    }
     free(id); // free it !
-    //printf("producer %d, finished", *id);
-	pthread_exit(NULL);
+    pthread_exit(NULL);
 }
-
 
 void insert(struct node* tmp_p, int i){
-	sem_wait(&spaces); // wait for spaces available
+    sem_wait(&spaces); // wait for spaces available
     pthread_mutex_lock(&(buffer.sem)); // then wait for there to buffer to be free
-			
-	tmp_p->next = NULL; // This will go to the end of the list
-	tmp_p->value=i; // Set the value
-		
-	if (buffer.size == 0) { // logic for when the buffer is empty
-		buffer.head = tmp_p; 
-		buffer.tail = tmp_p;	
-	} else { 
-		buffer.tail->next=tmp_p; // Point the tail to the temp
-		buffer.tail = tmp_p; // set the new location of tail
-	}
+            
+    tmp_p->next = NULL; // This will go to the end of the list
+    tmp_p->value=i; // Set the value
+        
+    if (buffer.size == 0) { // logic for when the buffer is empty
+        buffer.head = tmp_p; 
+        buffer.tail = tmp_p;    
+    } else { 
+        buffer.tail->next=tmp_p; // Point the tail to the temp
+        buffer.tail = tmp_p; // set the new location of tail
+    }
 
-	buffer.size ++; // increase the buffer count
+    buffer.size ++; // increase the buffer count
     pthread_mutex_unlock(&(buffer.sem)); // unlock the buff
-	sem_post(&items); // post to items
+    sem_post(&items); // post to items
+    //free(tmp_p);
 }
-
 
 int remove_from_buffer( struct node * tmp){
     int consumed_val = -1; // value from buffer 
     sem_wait(&items); // wait on available items
     pthread_mutex_lock(&(buffer.sem)); // wait on buffer being available
 
-	tmp = buffer.head; // set temp to the head of the list
-	consumed_val = tmp->value; // get the value of that item
-	if (buffer.size <= 1){ // if there is only one item in buff
-		buffer.head = NULL;		
+    tmp = buffer.head; // set temp to the head of the list
+    consumed_val = tmp->value; // get the value of that item
+    if (buffer.size <= 1){ // if there is only one item in buff
+        buffer.head = NULL;     
         buffer.tail = NULL;
-	} else {
-		buffer.head = tmp->next; // adjust the buffer head
-	}
-	buffer.size --; // adjust the size of the buffer
+    } else {
+        buffer.head = tmp->next; // adjust the buffer head
+    }
+    buffer.size --; // adjust the size of the buffer
 
-	pthread_mutex_unlock(&(buffer.sem)); // signal that the buffer is free
-	sem_post(&spaces); // signal that an item has been removed 
-	free(tmp); // free the old head/tmp
+    pthread_mutex_unlock(&(buffer.sem)); // signal that the buffer is free
+    sem_post(&spaces); // signal that an item has been removed 
+    free(tmp); // free the old head/tmp
     return(consumed_val);
 }
+
 
 void printer(int n, int id){
     if (n==0 || n==1){
         printf("%d %d %d \n", id, n, n);
     }
     for (int i = 0; i < (n); i++){
-		if ( (i*i) == n ) {
-		    printf("%d %d %d \n", id, n, i);
+        if ( (i*i) == n ) {
+            printf("%d %d %d \n", id, n, i);
         }
-	}
+    }
 
 }
+
 
 
