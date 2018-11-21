@@ -8,8 +8,8 @@ LD = gcc
 LDFLAGS = -ggdb
 LDLIBS = -lrt -lpthread -lm
 
-OBJS1 = sender.o point.o
-OBJS2 = receiver.o point.o
+OBJS1 = sender.o
+OBJS2 = receiver.o
 
 all: sender.out receiver.out produce
 
